@@ -10,7 +10,7 @@ RUN_ARGS = dict(command='/bin/sh', detach=True, stdin_open=True)
 
 
 def _f(commands, containers, image):
-    client = docker.from_env()
+    client = docker.from_env(version='auto')
     while True:
         container = commands.get()
         if not container:
