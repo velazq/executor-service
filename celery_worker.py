@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
 # coding: utf-8
 import os
-from base64 import b64decode
+import tar
 from celery import Celery
+from celery.signals import worker_process_init
 from executor import Executor
-from multiprocessing import Lock
 
 
 app = Celery(broker=os.environ['BROKER'], backend=os.environ['BACKEND'])
-executor = None
-lock = Lock()
+
+
+@worker_process_init.connect
+def init_worker(**kwargs):
+    global executor
+    executor = Executor('python')
 
 
 @app.task
-def execute(tar_base64, entrypoint):
-    with lock:
-        if executor is None:
-            executor = Executor('python')
-    tar_binary = b64decode(tar_base64)
-    return executor.execute(tar_binary, entrypoint)
+def execute(task_id, tar_base64, entrypoint):
+    tar_binary = tar.b64_to_bin(tar_base64)
+    output = executor.execute(tar_binary, entrypoint)
+    return dict(task_id=task_id, output=output)

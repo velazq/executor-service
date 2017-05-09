@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
+import os
 import docker
 from queue import Queue
 from threading import Event, Thread
@@ -49,7 +50,7 @@ class Executor(object):
         container = self.get_container()
         container.put_archive(internal_path, tar_binary)
         cmd = ['python3', os.path.join(internal_path, entrypoint)]
-        logs = container.exec_run(cmd).decode()
+        logs = container.exec_run(cmd).decode().strip()
         self.stop_container(container)
         return logs
 

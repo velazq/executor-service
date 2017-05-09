@@ -21,7 +21,7 @@ args = parser.parse_args()
 # f = open(filename, 'r')
 # r = post(args.url, data={'entrypoint': args.entrypoint}, files={'tarfile': f})
 
-f = tar.tar(args.dirname)
+f = tar.make_tar_file(args.dirname)
 r = post(args.url, data={'id': '1', 'entrypoint': args.entrypoint}, files={'tarfile': f})
 print(r.text)
 f.close()
