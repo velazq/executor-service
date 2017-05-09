@@ -3,7 +3,7 @@
 import os
 import tar
 from celery import Celery
-from celery.signals import worker_process_init
+from celery.signals import worker_process_init, worker_process_shutdown
 from executor import Executor
 
 
@@ -15,6 +15,9 @@ def init_worker(**kwargs):
     global executor
     executor = Executor('python')
 
+@worker_process_shutdown.connect
+def shutdown_worker(**kwargs):
+    executor.stop_all()
 
 @app.task
 def execute(task_id, tar_base64, entrypoint):

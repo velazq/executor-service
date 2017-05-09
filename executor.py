@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 import os
+import time
 import docker
 from queue import Queue
 from threading import Event, Thread
@@ -43,8 +44,17 @@ class Executor(object):
         self.start_container()
         return self.containers.get()
 
-    def stop_container(self, container_id):
-        self.commands.put(container_id)
+    def stop_container(self, container):
+        self.commands.put(container)
+
+    def stop_all(self):
+        self.comands = None
+        try:
+            while True:
+                container = self.containers.get(False)
+                self.stop_container(container)
+        except:
+            time.sleep(2)
 
     def execute(self, tar_binary, entrypoint, internal_path='/mnt'):
         container = self.get_container()
