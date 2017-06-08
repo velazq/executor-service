@@ -15,9 +15,10 @@ args = parser.parse_args()
 tasks = []
 
 for folder in next(os.walk(args.folder))[1]:
-    f = tar.make_tar_file(folder, mode='rb')
+    path = os.path.join(args.folder, folder)
+    f = tar.make_tar_file(path, mode='rb')
     tar_base64 = tar.bin_to_b64(f.read())
-    task_id = folder + ' ' + str(uuid.uuid4())
+    task_id = path + ' ' + str(uuid.uuid4())
     task = celery_worker.execute.delay(task_id, tar_base64, args.entrypoint)
     tasks.append(task)
 
