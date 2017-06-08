@@ -20,7 +20,7 @@ def init_worker(**kwargs):
 def shutdown_worker(**kwargs):
     executor.stop_all()
 
-@app.task(soft_time_limit=15, time_limit=20)
+@app.task(soft_time_limit=200, time_limit=220)
 def execute(task_id, tar_base64, entrypoint):
     try:
         tar_binary = tar.b64_to_bin(tar_base64)
