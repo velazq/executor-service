@@ -4,6 +4,7 @@ import os
 import tar
 from celery import Celery
 from celery.signals import worker_process_init, worker_process_shutdown
+from celery.exceptions import SoftTimeLimitExceeded
 from executor import Executor
 
 
@@ -19,8 +20,11 @@ def init_worker(**kwargs):
 def shutdown_worker(**kwargs):
     executor.stop_all()
 
-@app.task
+@app.task(soft_time_limit=15, time_limit=20)
 def execute(task_id, tar_base64, entrypoint):
-    tar_binary = tar.b64_to_bin(tar_base64)
-    output = executor.execute(tar_binary, entrypoint)
-    return dict(task_id=task_id, output=output)
+    try:
+        tar_binary = tar.b64_to_bin(tar_base64)
+        output = executor.execute(tar_binary, entrypoint)
+        return dict(task_id=task_id, output=output)
+    except SoftTimeLimitExceeded:
+        return dict(task_id=task_id, output='Killed')
